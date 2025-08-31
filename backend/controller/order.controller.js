@@ -122,6 +122,37 @@ class OrderController {
       });
     }
   }
+
+  static async getOrderByUserId(req, res){
+    const {userId} = req.params;
+
+    try {
+        
+        const orders = await Order.find({user: userId})
+        .populate("user", "name email")
+        .populate("items.product", "name price image_uri ar_uri")
+        .sort({createdAt: -1});
+
+        if (!orders || orders.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No orders found for this user"
+            })
+        };
+
+        res.status(200).json({
+            success: true,
+            orders
+        })
+
+    } catch (error) {
+         return res.status(500).json({
+        success: false,
+        message: "Failed to create transaction",
+        error: error.message,
+      });
+    }
+  }
 }
 
 export default OrderController;
